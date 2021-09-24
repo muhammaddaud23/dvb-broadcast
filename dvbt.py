@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 ##################################################
 # GNU Radio Python Flow Graph
@@ -16,7 +16,7 @@ from gnuradio.eng_option import eng_option
 from gnuradio.fft import window
 from gnuradio.filter import firdes
 from optparse import OptionParser
-import ConfigParser
+import configparser as ConfigParser
 import osmosdr
 import time
 import sys
@@ -71,66 +71,66 @@ class DVBT_TX(gr.top_block):
         except: coderate = 0
         self.coderate = coderate
 
-	infile = str(sys.argv[1])
+        infile = str(sys.argv[1])
 
 	#Constellation QPSK 16QAM 64QAM
-	if constellation == "QPSK":
-		const = dtv.MOD_QPSK
-	elif constellation == "16QAM":
-		const = dtv.MOD_16QAM
-	elif constellation == "64QAM":
-		const = dtv.MOD_64QAM
-	else:
-		sys.stderr.write("CONSTELLATION IN CONFIG WRONG! Values: QPSK, 16QAM or 64QAM \n");
-        	sys.exit(1)
+        if constellation == "QPSK":
+                const = dtv.MOD_QPSK
+        elif constellation == "16QAM":
+                const = dtv.MOD_16QAM
+        elif constellation == "64QAM":
+                const = dtv.MOD_64QAM
+        else:
+                sys.stderr.write("CONSTELLATION IN CONFIG WRONG! Values: QPSK, 16QAM or 64QAM \n");
+                sys.exit(1)
 
 	# Coderate 1/2 2/3 3/4 5/6 7/8	
 
-	if coderate == "1/2":
-		codr = dtv.C1_2
-	elif coderate == "2/3":
-		codr = dtv.C2_3
-	elif coderate == "3/4":
-		codr = dtv.C3_4
-	elif coderate == "5/6":
-		codr = dtv.C5_6
-	elif coderate == "7/8":
-		codr = dtv.C7_8
-	else:
-		sys.stderr.write("CODERATE IN CONFIG WRONG! Values: 1/2, 2/3, 3/4, 5/6 or 7/8 \n");
-        	sys.exit(1) 
+        if coderate == "1/2":
+                codr = dtv.C1_2
+        elif coderate == "2/3":
+                codr = dtv.C2_3
+        elif coderate == "3/4":
+                codr = dtv.C3_4
+        elif coderate == "5/6":
+                codr = dtv.C5_6
+        elif coderate == "7/8":
+                codr = dtv.C7_8
+        else:
+                sys.stderr.write("CODERATE IN CONFIG WRONG! Values: 1/2, 2/3, 3/4, 5/6 or 7/8 \n");
+                sys.exit(1) 
 
 
-	if mode == "2k":
-		factor = 1
-		carriers = 2048
-		modus = dtv.T2k
-	elif mode == "8k":
-		factor = 4
-		carriers = 8192
-		modus = dtv.T8k
-	else:
-		sys.stderr.write("MODE IN CONFIG WRONG! Values: 2k or 8k \n");
-        	sys.exit(1) 
+        if mode == "2k":
+                factor = 1
+                carriers = 2048
+                modus = dtv.T2k
+        elif mode == "8k":
+                factor = 4
+                carriers = 8192
+                modus = dtv.T8k
+        else:
+                sys.stderr.write("MODE IN CONFIG WRONG! Values: 2k or 8k \n");
+                sys.exit(1) 
 
 
 
 	#guard_interval dtv.GI_1_32 1/4 1/8 1/16 1/32
-	if guard_interval == "1/4":
-		guardi = dtv.GI_1_4
-		gi = carriers / 4
-	elif guard_interval == "1/8":
-		guardi = dtv.GI_1_8
-		gi = carriers / 8
-	elif guard_interval == "1/16":
-		guardi = dtv.GI_1_16
-		gi = carriers / 16
-	elif guard_interval == "1/32":
-		guardi = dtv.GI_1_32
-		gi = carriers / 32
-	else:
-		sys.stderr.write("GUARD_INTERVAL IN CONFIG WRONG! Values: 1/4, 1/8, 1/16 or 1/32 \n");
-        	sys.exit(1)
+        if guard_interval == "1/4":
+                guardi = dtv.GI_1_4
+                gi = carriers / 4
+        elif guard_interval == "1/8":
+                guardi = dtv.GI_1_8
+                gi = carriers / 8
+        elif guard_interval == "1/16":
+                guardi = dtv.GI_1_16
+                gi = carriers / 16
+        elif guard_interval == "1/32":
+                guardi = dtv.GI_1_32
+                gi = carriers / 32
+        else:
+                sys.stderr.write("GUARD_INTERVAL IN CONFIG WRONG! Values: 1/4, 1/8, 1/16 or 1/32 \n");
+                sys.exit(1)
 
 
 
@@ -146,7 +146,7 @@ class DVBT_TX(gr.top_block):
         self.osmosdr_sink_0.set_if_gain(if_gain, 0)
         self.osmosdr_sink_0.set_bb_gain(0, 0)
         self.osmosdr_sink_0.set_antenna('', 0)
-        self.osmosdr_sink_0.set_bandwidth(0, 0)
+        self.osmosdr_sink_0.set_bandwidth(bandwidth, 0)
           
         self.fft_vxx_0 = fft.fft_vcc(carriers, False, (window.rectangular(carriers)), True, 1)
         self.dtv_dvbt_symbol_inner_interleaver_0 = dtv.dvbt_symbol_inner_interleaver((1512 * factor), modus, 1)
@@ -160,19 +160,19 @@ class DVBT_TX(gr.top_block):
         self.digital_ofdm_cyclic_prefixer_0 = digital.ofdm_cyclic_prefixer(carriers, carriers+(gi), 0, '')
         self.blocks_multiply_const_vxx_0 = blocks.multiply_const_vcc((0.0022097087, ))
 
-	if infile == "-":
-		self.blocks_file_descriptor_source_0 = blocks.file_descriptor_source(gr.sizeof_char*1, 0, True)
-	else:
-        	self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, infile, True)
+        if infile == "-":
+                self.blocks_file_descriptor_source_0 = blocks.file_descriptor_source(gr.sizeof_char*1, 0, True)
+        else:
+                self.blocks_file_source_0 = blocks.file_source(gr.sizeof_char*1, infile, True)
 
         ##################################################
         # Connections
         ##################################################
 
-	if infile == "-":
-		self.connect((self.blocks_file_descriptor_source_0, 0), (self.dtv_dvbt_energy_dispersal_0, 0))
-	else:
-        	self.connect((self.blocks_file_source_0, 0), (self.dtv_dvbt_energy_dispersal_0, 0))    
+        if infile == "-":
+                self.connect((self.blocks_file_descriptor_source_0, 0), (self.dtv_dvbt_energy_dispersal_0, 0))
+        else:
+                self.connect((self.blocks_file_source_0, 0), (self.dtv_dvbt_energy_dispersal_0, 0))    
 
 
         self.connect((self.blocks_multiply_const_vxx_0, 0), (self.osmosdr_sink_0, 0))    
@@ -188,7 +188,7 @@ class DVBT_TX(gr.top_block):
         self.connect((self.fft_vxx_0, 0), (self.digital_ofdm_cyclic_prefixer_0, 0))    
 
     def get_bandwidth(self):
-	print bandwidth
+        #print bandwidth
         return self.bandwidth
 
     def set_bandwidth(self, bandwidth):
@@ -265,11 +265,11 @@ def main(top_block_cls=DVBT_TX, options=None):
     tb = top_block_cls()
     tb.start()
     if not str(sys.argv[1]) == "-":
-    	try:
-    	    raw_input('Press Enter to quit: ')
-    	except EOFError:
+        try:
+    	    input('Press Enter to quit: ')
+        except EOFError:
     	    pass
-	tb.stop()
+        tb.stop()
     tb.wait()
 
 
